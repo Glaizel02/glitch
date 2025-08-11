@@ -129,7 +129,7 @@ with open('facebook_videos.csv', 'w', newline='', encoding='utf-8') as file:
 
 print("✅ Data saved to facebook_videos.csv")
 'https://www.facebook.com/pg/SkodaIndia/videos/?ref=page_internal',
-'https://www.facebook.com/pg/MSArenaOfficial/videos/?ref=page_internal']
+'https://www.facebook.com/pg/MSArenaOfficial/videos/?ref=page_internal'
 
 
 
