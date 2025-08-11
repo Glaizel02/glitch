@@ -1,61 +1,133 @@
-#Importing all the required packages.
 import time
+import sys
+import csv
 from bs4 import BeautifulSoup
-import sys, io
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.proxy import *
-import time
-from requests import get
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from contextlib import closing
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver import chrome
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
-import time
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-import requests
-import re
-from bs4 import BeautifulSoup
-import retrying
-import pandas as pd
-import xlsxwriter
-from datetime import datetime
+import chromedriver_autoinstaller
 
+# Auto-install matching ChromeDriver for your Chromium
+chromedriver_autoinstaller.install()
 
+# Unicode handling
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
 
-#We are using chrome chrome options as we have to disable the the notification from the browser as it appears when you open a new link, which results in breaking of the code.
+# Chrome options for Termux headless mode
 chrome_options = Options()
-#Disabling the chrome notification.
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-notifications")
-driver = webdriver.Chrome(executable_path='/Users/prateekgaurav/Downloads/chromedriver', chrome_options=chrome_options)
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--window-size=1920x1080")
 
-wait = WebDriverWait( driver, 10 )
+# Start Chrome
+driver = webdriver.Chrome(options=chrome_options)
 
-#Defining the required variables.
-names =[]
-video_links = []
-dates = []
-views =[]
+# Data storage
+names, video_links, dates, views = [], [], [], []
 
-# Mention all the lists of the url's to be scraped.
-urls = ['https://www.facebook.com/pg/RenaultIndia/videos/?ref=page_internal',
-'https://www.facebook.com/pg/HyundaiIndia/videos/?ref=page_internal',
-'https://www.facebook.com/pg/datsunindia/videos/?ref=page_internal',
-'https://www.facebook.com/pg/TataMotorsGroup/videos/?ref=page_internal',
-'https://www.facebook.com/pg/ToyotaIndia/videos/?ref=page_internal',
-'https://www.facebook.com/pg/HondaCarIndia/videos/?ref=page_internal',
-'https://www.facebook.com/pg/nissanindia/videos/?ref=page_internal',
-'https://www.facebook.com/pg/Volkswagenindia/videos/?ref=page_internal',
-'https://www.facebook.com/pg/FordIndia/videos/?ref=page_internal',
+# Facebook video page URLs to scrape
+urls = [
+    'https://www.facebook.com/pg/RenaultIndia/videos/?ref=page_internal',
+    'https://www.facebook.com/pg/HyundaiIndia/videos/?ref=page_internal',
+    'https://www.facebook.com/pg/datsunindia/videos/?ref=page_internal'
+    # Add more here...
+]
+
+# Login to Facebook
+driver.get('https://www.facebook.com')
+try:
+    username = driver.find_element(By.ID, "email")
+    password = driver.find_element(By.ID, "pass")
+    username.send_keys("*******")  # Your Facebook email
+    password.send_keys("*******")  # Your Facebook password
+    login_attempt = driver.find_element(By.XPATH, "//*[@type='submit']")
+    login_attempt.submit()
+    time.sleep(5)
+except:
+    print("Login failed or not needed.")
+
+# Loop through URLs
+for url in urls:
+    count = 0
+    print("Scraping:", url)
+    try:
+        driver.get(url)
+    except:
+        print("Error fetching:", url)
+        continue
+    time.sleep(5)
+
+    SCROLL_PAUSE_TIME = 3
+    last_height = driver.execute_script("return document.body.scrollHeight")
+
+    tmp, tmp1, tmp2, tmp3 = [], [], [], []
+
+    while count <= 100:
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(SCROLL_PAUSE_TIME)
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            break
+        last_height = new_height
+
+    page_html = BeautifulSoup(driver.page_source, "html.parser")
+    mv_containers = page_html.find_all("div", class_="_u3y")
+
+    for container in mv_containers:
+        # Video name
+        try:
+            name = container.find('div', class_='_3v4h _48gm _50f3 _50f7').text
+            tmp.append(name)
+        except:
+            tmp.append("No Data")
+
+        # Video link
+        try:
+            video_link = container.find('a', href=True)['href']
+            tmp1.append("https://www.facebook.com" + str(video_link))
+        except:
+            tmp1.append("No Data")
+
+        # Views
+        try:
+            view = container.find('span', class_='fcg').text.split(' ')[0]
+            if view.endswith('K'):
+                view = float(view[:-1]) * 1000
+            elif view.endswith('M'):
+                view = float(view[:-1]) * 1000000
+            else:
+                view = float(view)
+            tmp2.append(view)
+        except:
+            tmp2.append("No Data")
+
+        # Upload date
+        try:
+            date = container.find('div', class_='fsm fwn fcg').text
+            tmp3.append(date.split('·')[1])
+        except:
+            tmp3.append("No Data")
+
+        count += 1
+
+    names += tmp
+    video_links += tmp1
+    views += tmp2
+    dates += tmp3
+
+driver.quit()
+
+# Save to CSV
+with open('facebook_videos.csv', 'w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Video Name', 'Views', 'Video Link', 'Upload Date'])
+    for name, view, link, date in zip(names, views, video_links, dates):
+        writer.writerow([name, view, link, date])
+
+print("✅ Data saved to facebook_videos.csv")
 'https://www.facebook.com/pg/SkodaIndia/videos/?ref=page_internal',
 'https://www.facebook.com/pg/MSArenaOfficial/videos/?ref=page_internal']
 
