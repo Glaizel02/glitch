@@ -1,4 +1,4 @@
-> Gammy:
+
 #========SEND======@ZERO_CYBER_TEM
 #TG====== https://t.me/ZERO_CYBER_TEM
 #=======__FREE____=======
