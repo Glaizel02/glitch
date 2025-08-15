@@ -487,7 +487,7 @@ class FacebookAutoShare:
             "blue"
         )
         
-choice = input("\033[95m\n[›] 𝐒𝐄𝐋𝐄𝐂𝐓: \033[0m")  # hot pink / magenta
+   choice = input("\n[›] Select: ") # hot pink / magenta
         
         if choice == "0":
             self.current_menu = "main"
@@ -829,7 +829,7 @@ choice = input("\033[95m\n[›] 𝐒𝐄𝐋𝐄𝐂𝐓: \033[0m")  # hot pink 
                 
             elif self.current_menu == "share":
                 self.show_share_menu()
-               choice = input("\033[95m\n[›] 𝐒𝐄𝐋𝐄𝐂𝐓: \033[0m")  # hot pink / magenta
+                choice = input("\n[›] Select: ")# hot pink / magenta
 
                 
                 if choice == "0":
