@@ -15,6 +15,7 @@ from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
 from rich.table import Table
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Dict, Optional, Tuple, Union
+import rich.box
 
 class LocalDBManager:
     def __init__(self):
@@ -324,32 +325,37 @@ class FacebookAutoShare:
         return headers
 
     def loading(self, duration: float = 2, message: str = "Processing") -> None:
-        symbols = ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷']
+        symbols = ['◉', '◎', '◌', '◍']
         end_time = time.time() + duration
         while time.time() < end_time:
             for symbol in symbols:
-                print(f"\033[95m  {symbol} {message}...\033[0m", end='\r')
+                print(f"\033[93m{symbol} {message}...\033[0m", end='\r')
                 time.sleep(0.1)
         print(" " * (len(message) + 10), end='\r')
 
     def print_panel(self, title, content, color):
-        self.console.print(Panel(content, title=title, width=None, padding=(1, 4), style=f"bold {color}", title_align="center", border_style="hot_pink"))
+        self.console.print(Panel(
+            content,
+            title=title,
+            width=None,
+            padding=(1, 3),
+            border_style=color,
+            title_align="left",
+            style=f"bold {color}",
+            box=rich.box.ROUNDED
+        ))
 
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
 
     def show_banner(self):
         banner = r"""
-
-                      [magenta]  ██████╗ ██╗      ██╗ ████████╗  ██████╗ ██╗  ██╗
-                      [medium_purple]██╔════╝  ██║      ██║ ╚══██╔══╝ ██╔════╝ ██║  ██║
-                      [orchid]██║  ███╗ ██║      ██║    ██║    ██║      ███████║
-                      [deep_pink4]██║   ██║ ██║      ██║    ██║    ██║      ██╔══██║
-                      [bright_magenta]╚██████╔╝ ███████╗ ██║    ██║    ╚██████╗ ██║  ██║
-                      [magenta] ╚═════╝  ╚══════╝ ╚═╝    ╚═╝     ╚═════╝ ╚═╝  ╚═╝
-                                             
-
-
+               [magenta]  ██████╗ ██╗      ██╗ ████████╗  ██████╗ ██╗  ██╗
+               [medium_purple]██╔════╝  ██║      ██║ ╚══██╔══╝ ██╔════╝ ██║  ██║
+               [orchid]██║  ███╗ ██║      ██║    ██║    ██║      ███████║
+               [deep_pink4]██║   ██║ ██║      ██║    ██║    ██║      ██╔══██║
+               [bright_magenta]╚██████╔╝ ███████╗ ██║    ██║    ╚██████╗ ██║  ██║
+               [magenta] ╚═════╝  ╚══════╝ ╚═╝    ╚═╝     ╚═════╝ ╚═╝  ╚═╝
         """
         menu_modes = {
             'main': 'Main Menu',
@@ -365,21 +371,21 @@ class FacebookAutoShare:
 [›] 𝐃𝐞𝐯: 𝐆𝐋𝐈𝐓𝐂𝐇𝐁𝐘𝐀𝐍𝐍𝐈𝐄
 [›] 𝐒𝐭𝐚𝐭𝐮𝐬: 𝐀𝐜𝐭𝐢𝐯𝐞
 [›] 𝐏𝐚𝐧𝐞𝐥: {current_mode}
-
         """
-        self.print_panel('', banner, "hot_pink")
-        self.print_panel('INFO', info, "purple")
+        self.print_panel('', banner, "bright_cyan")
+        self.print_panel('INFO', info, "bright_blue")
+
     def show_main_menu(self):
         self.current_menu = "main"
         self.clear_screen()
         self.show_banner()
         self.print_panel(
             "Main Menu",
-          "[𝟏] 𝐈𝐍𝐈𝐓𝐈𝐀𝐋𝐈𝐙𝐄 𝐒𝐏𝐀𝐌𝐒𝐇𝐀𝐑𝐄\n"
-          "[𝟐] 𝐌𝐀𝐍𝐀𝐆𝐄 𝐑𝐄𝐒𝐎𝐔𝐑𝐂𝐄𝐒\n"
-          "[𝟑] 𝐓𝐎𝐊𝐄𝐍 𝐆𝐄𝐍𝐄𝐑𝐀𝐓𝐎𝐑\n"
-          "[𝟒] 𝐄𝐗𝐈𝐓",
-            "hot_pink"
+             "[𝟏] 𝐈𝐍𝐈𝐓𝐈𝐀𝐋𝐈𝐙𝐄 𝐒𝐏𝐀𝐌𝐒𝐇𝐀𝐑𝐄\n"
+             "[𝟐] 𝐌𝐀𝐍𝐀𝐆𝐄 𝐑𝐄𝐒𝐎𝐔𝐑𝐂𝐄𝐒\n"
+             "[𝟑] 𝐓𝐎𝐊𝐄𝐍 𝐆𝐄𝐍𝐄𝐑𝐀𝐓𝐎𝐑\n"
+             "[𝟒] 𝐄𝐗𝐈𝐓",
+            "bright_green"
         )
 
     def show_share_menu(self):
@@ -391,9 +397,8 @@ class FacebookAutoShare:
            "[𝟏] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐔𝐒𝐄𝐑\n"
            "[𝟐] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐏𝐀𝐆𝐄\n"
            "[𝟑] 𝐂𝐎𝐌𝐁𝐈𝐍𝐄𝐃 𝐒𝐇𝐀𝐑𝐈𝐍𝐆\n"
-           "[𝟎] 𝐁𝐀𝐂𝐊 𝐓𝐎 𝐌𝐀𝐈𝐍"
-
-            "hot_pink"
+           "[𝟎] 𝐁𝐀𝐂𝐊 𝐓𝐎 𝐌𝐀𝐈𝐍",
+            "bright_yellow"
         )
 
     async def show_resource_management(self):
@@ -404,11 +409,11 @@ class FacebookAutoShare:
         resources = self.db.get_resources()
         
         table = Table(
-            title=f"[bold purple]Resources[/] (Testing {len(resources)} entries...)",
+            title=f"[bold bright_cyan]Resources[/] (Testing {len(resources)} entries...)",
             show_header=True,
-            header_style="bold hot_pink",
+            header_style="bold bright_blue",
             width=59,
-            style="purple"
+            border_style="bright_green"
         )
         
         table.add_column("#", style="dim", width=4)
@@ -419,9 +424,9 @@ class FacebookAutoShare:
     
         tested_resources = []
         with Progress(
-            TextColumn("[progress.description]{task.description}", style="purple"),
-            BarColumn(bar_width=None, style="hot_pink", complete_style="purple"),
-            TextColumn("[progress.percentage]{task.percentage:>3.0f}%", style="hot_pink"),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(bar_width=25),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
             TimeRemainingColumn(),
             transient=True
         ) as progress:
@@ -482,7 +487,7 @@ class FacebookAutoShare:
         self.print_panel(
             "Controls",
             "[1] Add  [2] Remove  [3] Test All  [0] Back",
-            "hot_pink"
+            "bright_magenta"
         )
 
     async def show_token_generator(self):
@@ -494,10 +499,9 @@ class FacebookAutoShare:
             "Token Generator",
            "[𝟏] 𝐆𝐄𝐓 𝐓𝐎𝐊𝐄𝐍𝐒+𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
            "[𝟐] 𝐆𝐄𝐓 𝐂𝐎𝐎𝐊𝐈𝐄𝐒 𝐎𝐍𝐋𝐘\n"
-           "[𝟑] 𝐆𝐄𝐓 𝐄𝐀𝐀𝐆 𝐓𝐎𝐊𝐄𝐍 𝐅𝐑𝐎𝐌 𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
+           "[𝟑] 𝐆𝐄𝐓 𝐄𝐀𝐀𝐆 𝐓𝐎𝐊𝐄𝐍 𝐅𝐑𝐎�	M 𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
            "[𝟎] 𝐁𝐀𝐂𝐊 𝐓𝐎 𝐌𝐀𝐈𝐍",
-
-            "hot_pink"
+            "bright_cyan"
         )
         
         choice = input("\n[›] Select: ")
@@ -518,8 +522,8 @@ class FacebookAutoShare:
         self.clear_screen()
         self.show_banner()
         
-        email = input("[›] Email/Username: ")
-        password = input("[›] Password: ")
+        email = input("[›] 𝐄𝐌𝐀𝐈𝐋/𝐔𝐒𝐄𝐑𝐍𝐀𝐌𝐄: ")
+        password = input("[›] 𝐏𝐀𝐒𝐒𝐖𝐎𝐑𝐃: ")
         
         self.loading(3, "Authenticating")
         
@@ -533,12 +537,12 @@ class FacebookAutoShare:
             input("\n[Press Enter to continue]")
             await self.show_token_generator()
         
-        table = Table(title="Generated Tokens", show_header=True, header_style="bold purple", style="hot_pink")
-        table.add_column("Token Type", style="purple")
-        table.add_column("Value", style="green")
+        table = Table(title="Generated Tokens", show_header=True, header_style="bold bright_blue", border_style="bright_cyan")
+        table.add_column("Token Type", style="bright_green")
+        table.add_column("Value", style="white")
         
-        table.add_row("Cookies", result["cookies"])
-        table.add_row("EAAAAU Token", result["eaaau"])
+        table.add_row("Cookies", result["cookies"] or "[red]Failed to get[/red]")
+        table.add_row("EAAAAU Token", result["eaaau"] or "[red]Failed to get[/red]")
         
         if result["eaad6v7"]:
             table.add_row("EAAD6V7 Token", result["eaad6v7"])
@@ -553,9 +557,8 @@ class FacebookAutoShare:
         self.console.print(table)
         
         if result["errors"]:
-            self.print_panel("Partial Errors", "\n".join(result["errors"]), "purple")
+            self.print_panel("Partial Errors", "\n".join(result["errors"]), "yellow")
         
-        # Ask to save to resources
         save = input("\n[›] Save to resources? (y/n): ").lower()
         if save == 'y':
             if result["cookies"]:
@@ -575,8 +578,8 @@ class FacebookAutoShare:
         self.clear_screen()
         self.show_banner()
         
-        email = input("[›] 𝐄𝐌𝐀𝐈𝐋/𝐔𝐒𝐄𝐑𝐍𝐀𝐌𝐄: ")
-        password = input("[›] 𝐏𝐀𝐒𝐒𝐖𝐎𝐑𝐃: ")
+        email = input("[›] Email/Username: ")
+        password = input("[›] Password: ")
         
         self.loading(3, "Fetching Cookies")
         
@@ -589,7 +592,7 @@ class FacebookAutoShare:
             self.print_panel("Error", result["message"], "red")
         else:
             self.print_panel("Success", "Cookies obtained successfully!", "green")
-            self.print_panel("Cookies", result["cookies"], "hot_pink")
+            self.print_panel("Cookies", result["cookies"], "bright_blue")
             
             save = input("\n[›] Save to resources? (y/n): ").lower()
             if save == 'y':
@@ -616,7 +619,7 @@ class FacebookAutoShare:
             self.print_panel("Error", result["message"], "red")
         else:
             self.print_panel("Success", "EAAG Token retrieved successfully!", "green")
-            self.print_panel("EAAG Token", result["token"], "hot_pink")
+            self.print_panel("EAAG Token", result["token"], "bright_blue")
             
             save = input("\n[›] Save to resources? (y/n): ").lower()
             if save == 'y':
@@ -754,9 +757,9 @@ class FacebookAutoShare:
         self.start_time = time.time()
         
         with Progress(
-            TextColumn("[progress.description]{task.description}", style="purple"),
-            BarColumn(bar_width=None, style="hot_pink", complete_style="purple"),
-            TextColumn("[progress.percentage]{task.percentage:>3.0f}%", style="hot_pink"),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(bar_width=25),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
             TimeRemainingColumn(),
             transient=True
         ) as progress:
@@ -813,7 +816,7 @@ class FacebookAutoShare:
             self.print_panel("Error", "No valid tokens/cookies found", "red")
             return
         
-        self.print_panel("Status", f"Starting {total_shares} shares...", "hot_pink")
+        self.print_panel("Status", f"Starting {total_shares} shares...", "bright_blue")
         success, failed = await self.burst_share(share_type, post_id, total_shares)
         elapsed = time.time() - self.start_time
         
@@ -822,7 +825,7 @@ class FacebookAutoShare:
             f"Failed: {failed}\n"
             f"Time: {elapsed:.2f}s\n"
             f"Speed: {success/max(1, elapsed):.1f}/s",
-            "green" if success >= total_shares * 0.7 else "purple"
+            "green" if success >= total_shares * 0.7 else "yellow"
         )
 
     async def run(self):
