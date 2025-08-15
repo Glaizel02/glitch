@@ -294,14 +294,16 @@ class FacebookAutoShare:
         self.session = None
         self.executor = ThreadPoolExecutor(max_workers=100)
         self.connector = aiohttp.TCPConnector(limit=0, force_close=True)
-        self.concurrent = 50  # Increased for faster sharing
+        self.concurrent = 50  # High concurrency for speed
         self.start_time = None
         self.error_log = []
         self.db = LocalDBManager()
-        self.interval = 0  # Removed delay for maximum speed
-        self.REQUEST_TIMEOUT = 5  # Reduced timeout for faster retries
+        self.interval = 0  # No default delay
+        self.REQUEST_TIMEOUT = 5  # Short timeout for fast retries
         self.current_menu = "main"
         self.token_getter = FacebookTokenGetter()
+        self.MAX_RETRIES = 3  # Maximum retries for failed shares
+        self.RETRY_DELAY = 0.5  # Delay between retries (seconds)
 
     def _generate_user_agents(self):
         return [
@@ -368,7 +370,7 @@ class FacebookAutoShare:
         info = f"""
 [›] 𝐓𝐎𝐎𝐋: 𝐅𝐁 𝐒𝐩𝐚𝐦 𝐒𝐡𝐚𝐫𝐞
 [›] 𝐕𝐞𝐫𝐬𝐢𝐨𝐧: 𝟏.𝟏
-[›] 𝐃𝐞𝐯: 𝐆𝐋𝐈𝐓𝐂𝐇𝐁𝐘𝐀𝐍𝐍𝐈𝐄
+[›] 𝐃𝐞𝐯: 𝐆𝐋𝐈𝐓𝐂𝐇𝐒𝐇𝐀𝐃𝐎𝐖
 [›] 𝐒𝐭𝐚𝐭𝐮𝐬: 𝐀𝐜𝐭𝐢𝐯𝐞
 [›] 𝐏𝐚𝐧𝐞𝐥: {current_mode}
         """
@@ -383,7 +385,7 @@ class FacebookAutoShare:
             "Main Menu",
              "[𝟏] 𝐈𝐍𝐈𝐓𝐈𝐀𝐋𝐈𝐙𝐄 𝐒𝐏𝐀𝐌𝐒𝐇𝐀𝐑𝐄\n"
              "[𝟐] 𝐌𝐀𝐍𝐀𝐆𝐄 𝐑𝐄𝐒𝐎𝐔𝐑𝐂𝐄𝐒\n"
-             "[𝟑] 𝐓𝐎𝐊𝐄𝐍 𝐆𝐄𝐍𝐄𝐑𝐀𝐓𝐎𝐑\n"
+             "[𝟑] 𝐒𝐄𝐓𝐔𝐏 𝐓𝐎𝐊𝐄𝐍\n"
              "[𝟒] 𝐄𝐗𝐈𝐓",
             "bright_green"
         )
@@ -394,7 +396,7 @@ class FacebookAutoShare:
         self.show_banner()
         self.print_panel(
             "Spam Share",
-           "[𝟏] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐔𝐒𝐄�{R\n"
+           "[𝟏] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐔𝐒𝐄𝐑\n"
            "[𝟐] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐏𝐀𝐆𝐄\n"
            "[𝟑] 𝐂𝐎𝐌𝐁𝐈𝐍𝐄𝐃 𝐒𝐇𝐀𝐑𝐈𝐍𝐆\n"
            "[𝟎] 𝐁𝐀𝐂𝐊 𝐇𝐎𝐌𝐄",
@@ -496,11 +498,11 @@ class FacebookAutoShare:
         self.show_banner()
         
         self.print_panel(
-            "Token Generator",
+            "Setup Token",
            "[𝟏] 𝐆𝐄𝐓 𝐓𝐎𝐊𝐄𝐍𝐒+𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
-           "[𝟐] 𝐆𝐄𝐓 𝐂𝐎𝐎𝐊𝐈𝐄𝐒 𝐎𝐍𝐋�{Y\n"
+           "[𝟐] 𝐆𝐄𝐓 𝐂𝐎𝐎𝐊𝐈𝐄𝐒 𝐎𝐍𝐋𝐘\n"
            "[𝟑] 𝐆𝐄𝐓 𝐄𝐀𝐀𝐆 𝐓𝐎𝐊𝐄𝐍 𝐅𝐑𝐎𝐌 𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
-           "[𝟎] 𝐁𝐀𝐂𝐊 𝐇𝐎𝐌𝐄",
+           "[𝟎] 𝐁𝐀𝐂�{K 𝐇𝐎𝐌𝐄",
             "bright_cyan"
         )
         
@@ -522,7 +524,7 @@ class FacebookAutoShare:
         self.clear_screen()
         self.show_banner()
         
-        email = input("[›] 𝐄𝐌𝐀𝐈𝐋/𝐔𝐒𝐄𝐑𝐍𝐀𝐌𝐄: ")
+        email = input("[›] 𝐄𝐌𝐀𝐈𝐋/𝐔𝐒𝐄𝐑𝐍𝐀𝐌�{E: ")
         password = input("[›] 𝐏𝐀𝐒𝐒𝐖𝐎𝐑𝐃: ")
         
         self.loading(3, "Authenticating")
@@ -719,39 +721,63 @@ class FacebookAutoShare:
             return None
 
     async def perform_share(self, token: str, target_id: str, is_page: bool = False) -> bool:
-        try:
-            params = {
-                "link": f"https://m.facebook.com/{target_id}",
-                "published": "0",
-                "access_token": token
-            }
-            endpoint = f"{target_id}/feed" if is_page else "me/feed"
-            
-            async with self.session.post(
-                f"https://graph.facebook.com/{self.api_version}/{endpoint}",
-                params=params,
-                timeout=self.REQUEST_TIMEOUT
-            ) as resp:
-                data = await resp.json()
-                if resp.status != 200:
-                    self.error_log.append(f"Share Error: {data.get('error', {}).get('message', 'Unknown error')}")
-                    return False
-                return data.get('id') is not None
-        except Exception as e:
-            self.error_log.append(f"Share Exception: {str(e)}")
-            return False
+        for attempt in range(self.MAX_RETRIES):
+            try:
+                params = {
+                    "link": f"https://m.facebook.com/{target_id}",
+                    "published": "0",
+                    "access_token": token
+                }
+                endpoint = f"{target_id}/feed" if is_page else "me/feed"
+                
+                async with self.session.post(
+                    f"https://graph.facebook.com/{self.api_version}/{endpoint}",
+                    params=params,
+                    timeout=self.REQUEST_TIMEOUT
+                ) as resp:
+                    data = await resp.json()
+                    if resp.status == 200:
+                        return data.get('id') is not None
+                    else:
+                        error_msg = data.get('error', {}).get('message', 'Unknown error')
+                        self.error_log.append(f"Share Error (Attempt {attempt + 1}): {error_msg}")
+                        if "rate limit" in error_msg.lower() or resp.status == 403:
+                            await asyncio.sleep(self.RETRY_DELAY * (2 ** attempt))  # Exponential backoff
+                        else:
+                            return False
+            except Exception as e:
+                self.error_log.append(f"Share Exception (Attempt {attempt + 1}): {str(e)}")
+                if attempt < self.MAX_RETRIES - 1:
+                    await asyncio.sleep(self.RETRY_DELAY * (2 ** attempt))  # Exponential backoff
+        return False
 
     async def burst_share(self, share_type: int, post_id: str, total_shares: int) -> Tuple[int, int]:
         tokens = self.load_tokens()
+        valid_tokens = []
         pages = []
         
-        if share_type in [2, 3]:
-            for token_data in tokens.copy():
+        # Pre-validate tokens
+        with Progress(
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(bar_width=25),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeRemainingColumn(),
+            transient=True
+        ) as progress:
+            task = progress.add_task("Validating tokens...", total=len(tokens))
+            for token_data in tokens:
                 result = await self.verify_token(token_data['token'])
-                if result['valid'] and result.get('pages'):
-                    pages.extend(result['pages'])
-                    if share_type == 2:  # Pages only mode
-                        tokens.remove(token_data)
+                if result['valid']:
+                    valid_tokens.append(token_data)
+                    if share_type in [2, 3] and result.get('pages'):
+                        pages.extend(result['pages'])
+                progress.update(task, advance=1)
+        
+        if share_type == 2:  # Pages only mode
+            valid_tokens = []
+        
+        if not valid_tokens and not pages:
+            return 0, total_shares  # No valid tokens or pages
 
         success = failed = 0
         self.start_time = time.time()
@@ -761,15 +787,15 @@ class FacebookAutoShare:
             tasks = []
             
             for _ in range(min(batch_size, total_shares - success - failed)):
-                if share_type == 1 and tokens:  # User only
-                    token = random.choice(tokens)['token']
+                if share_type == 1 and valid_tokens:  # User only
+                    token = random.choice(valid_tokens)['token']
                     tasks.append(self.perform_share(token, post_id))
                 elif share_type == 2 and pages:  # Page only
                     page = random.choice(pages)
                     tasks.append(self.perform_share(page['access_token'], page['id'], True))
                 elif share_type == 3:  # Combined
-                    if tokens and (not pages or random.choice([True, False])):
-                        token = random.choice(tokens)['token']
+                    if valid_tokens and (not pages or random.choice([True, False])):
+                        token = random.choice(valid_tokens)['token']
                         tasks.append(self.perform_share(token, post_id))
                     elif pages:
                         page = random.choice(pages)
@@ -804,7 +830,15 @@ class FacebookAutoShare:
                 failed += batch_failed
                 progress.update(task, advance=batch_success + batch_failed)
                 
-                # Minimal sleep to prevent overwhelming the server
+                if failed > 0 and success + failed < total_shares:
+                    # Retry failed shares with a short delay
+                    await asyncio.sleep(self.RETRY_DELAY)
+                    retry_success, retry_failed = await share_batch(failed)
+                    success += retry_success
+                    failed -= retry_success  # Adjust failed count
+                    failed += retry_failed
+                    progress.update(task, advance=retry_success + retry_failed - failed)
+                
                 if self.interval > 0:
                     await asyncio.sleep(self.interval)
         
