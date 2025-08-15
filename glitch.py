@@ -294,12 +294,12 @@ class FacebookAutoShare:
         self.session = None
         self.executor = ThreadPoolExecutor(max_workers=100)
         self.connector = aiohttp.TCPConnector(limit=0, force_close=True)
-        self.concurrent = 17
+        self.concurrent = 50  # Increased for faster sharing
         self.start_time = None
         self.error_log = []
         self.db = LocalDBManager()
-        self.interval = 0
-        self.REQUEST_TIMEOUT = 30
+        self.interval = 0  # Removed delay for maximum speed
+        self.REQUEST_TIMEOUT = 5  # Reduced timeout for faster retries
         self.current_menu = "main"
         self.token_getter = FacebookTokenGetter()
 
@@ -394,10 +394,10 @@ class FacebookAutoShare:
         self.show_banner()
         self.print_panel(
             "Spam Share",
-           "[𝟏] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐔𝐒𝐄𝐑\n"
+           "[𝟏] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐔𝐒𝐄�{R\n"
            "[𝟐] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐏𝐀𝐆𝐄\n"
            "[𝟑] 𝐂𝐎𝐌𝐁𝐈𝐍𝐄𝐃 𝐒𝐇𝐀𝐑𝐈𝐍𝐆\n"
-           "[𝟎] 𝐁𝐀𝐂𝐊 𝐓𝐎 𝐌𝐀𝐈𝐍",
+           "[𝟎] 𝐁𝐀𝐂𝐊 𝐇𝐎𝐌𝐄",
             "bright_yellow"
         )
 
@@ -498,9 +498,9 @@ class FacebookAutoShare:
         self.print_panel(
             "Token Generator",
            "[𝟏] 𝐆𝐄𝐓 𝐓𝐎𝐊𝐄𝐍𝐒+𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
-           "[𝟐] 𝐆𝐄𝐓 𝐂𝐎𝐎𝐊𝐈𝐄𝐒 𝐎𝐍𝐋𝐘\n"
-           "[𝟑] 𝐆𝐄𝐓 𝐄𝐀𝐀𝐆 𝐓𝐎𝐊𝐄𝐍 𝐅𝐑𝐎�	M 𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
-           "[𝟎] 𝐁𝐀𝐂𝐊 𝐓𝐎 𝐌𝐀𝐈𝐍",
+           "[𝟐] 𝐆𝐄𝐓 𝐂𝐎𝐎𝐊𝐈𝐄𝐒 𝐎𝐍𝐋�{Y\n"
+           "[𝟑] 𝐆𝐄𝐓 𝐄𝐀𝐀𝐆 𝐓𝐎𝐊𝐄𝐍 𝐅𝐑𝐎𝐌 𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
+           "[𝟎] 𝐁𝐀𝐂𝐊 𝐇𝐎𝐌𝐄",
             "bright_cyan"
         )
         
@@ -515,7 +515,7 @@ class FacebookAutoShare:
         elif choice == "3":
             await self.get_eaag_from_cookies()
         else:
-            self.print_panel("Error", "Invalid choice", "red")
+            self.print_panel("Error", "Invalid selection", "red")
             time.sleep(1)
 
     async def get_all_tokens(self):
@@ -730,7 +730,7 @@ class FacebookAutoShare:
             async with self.session.post(
                 f"https://graph.facebook.com/{self.api_version}/{endpoint}",
                 params=params,
-                timeout=5
+                timeout=self.REQUEST_TIMEOUT
             ) as resp:
                 data = await resp.json()
                 if resp.status != 200:
@@ -756,6 +756,38 @@ class FacebookAutoShare:
         success = failed = 0
         self.start_time = time.time()
         
+        async def share_batch(batch_size: int) -> Tuple[int, int]:
+            batch_success = batch_failed = 0
+            tasks = []
+            
+            for _ in range(min(batch_size, total_shares - success - failed)):
+                if share_type == 1 and tokens:  # User only
+                    token = random.choice(tokens)['token']
+                    tasks.append(self.perform_share(token, post_id))
+                elif share_type == 2 and pages:  # Page only
+                    page = random.choice(pages)
+                    tasks.append(self.perform_share(page['access_token'], page['id'], True))
+                elif share_type == 3:  # Combined
+                    if tokens and (not pages or random.choice([True, False])):
+                        token = random.choice(tokens)['token']
+                        tasks.append(self.perform_share(token, post_id))
+                    elif pages:
+                        page = random.choice(pages)
+                        tasks.append(self.perform_share(page['access_token'], page['id'], True))
+            
+            if tasks:
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                for result in results:
+                    if isinstance(result, Exception):
+                        batch_failed += 1
+                        self.error_log.append(f"Share Exception: {str(result)}")
+                    elif result:
+                        batch_success += 1
+                    else:
+                        batch_failed += 1
+            
+            return batch_success, batch_failed
+
         with Progress(
             TextColumn("[progress.description]{task.description}"),
             BarColumn(bar_width=25),
@@ -766,37 +798,15 @@ class FacebookAutoShare:
             task = progress.add_task("Sharing...", total=total_shares)
             
             while success + failed < total_shares:
-                try:
-                    if share_type == 1 and tokens:  # User only
-                        token = random.choice(tokens)['token']
-                        result = await self.perform_share(token, post_id)
-                    elif share_type == 2 and pages:  # Page only
-                        page = random.choice(pages)
-                        result = await self.perform_share(page['access_token'], page['id'], True)
-                    elif share_type == 3:  # Combined
-                        if tokens and (not pages or random.choice([True, False])):
-                            token = random.choice(tokens)['token']
-                            result = await self.perform_share(token, post_id)
-                        elif pages:
-                            page = random.choice(pages)
-                            result = await self.perform_share(page['access_token'], page['id'], True)
-                        else:
-                            break
-                    else:
-                        break
-                    
-                    if result:
-                        success += 1
-                    else:
-                        failed += 1
-                    
-                    progress.update(task, advance=1)
-                    
-                    if self.interval > 0:
-                        await asyncio.sleep(self.interval)
-                except Exception as e:
-                    failed += 1
-                    self.error_log.append(f"Task Error: {str(e)}")
+                batch_size = min(self.concurrent, total_shares - success - failed)
+                batch_success, batch_failed = await share_batch(batch_size)
+                success += batch_success
+                failed += batch_failed
+                progress.update(task, advance=batch_success + batch_failed)
+                
+                # Minimal sleep to prevent overwhelming the server
+                if self.interval > 0:
+                    await asyncio.sleep(self.interval)
         
         return success, failed
 
@@ -852,12 +862,12 @@ class FacebookAutoShare:
                 elif choice in ["1", "2", "3"]:
                     post_link = input("[›] Post URL: ")
                     amount = int(input("[›] Share count: ") or 5)
-                    self.interval = float(input("[›] Delay (seconds): ") or 3)
+                    self.interval = float(input("[›] Delay (seconds): ") or 0)
                     
                     await self.run_share_process(int(choice), post_link, amount)
                     input("\n[Press Enter to continue]")
                 else:
-                    self.print_panel("Error", "Invalid choice", "red")
+                    self.print_panel("Error", "Invalid selection", "red")
                     time.sleep(1)
 
             elif self.current_menu == "resources":
@@ -895,7 +905,7 @@ class FacebookAutoShare:
                 await self.show_resource_management()
                 time.sleep(1)
             else:
-                self.print_panel("Error", "Invalid choice", "red")
+                self.print_panel("Error", "Invalid selection", "red")
                 time.sleep(1)
 
 async def main():
