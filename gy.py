@@ -487,7 +487,7 @@ class FacebookAutoShare:
             "blue"
         )
         
-        choice = input("\n[›] 𝐒𝐄𝐋𝐄𝐂𝐓: ", "hot_pink")
+choice = input("\033[95m\n[›] 𝐒𝐄𝐋𝐄𝐂𝐓: \033[0m")  # hot pink / magenta
         
         if choice == "0":
             self.current_menu = "main"
@@ -829,14 +829,15 @@ class FacebookAutoShare:
                 
             elif self.current_menu == "share":
                 self.show_share_menu()
-                choice = input("\n[›] Select: ")
+               choice = input("\033[95m\n[›] 𝐒𝐄𝐋𝐄𝐂𝐓: \033[0m")  # hot pink / magenta
+
                 
                 if choice == "0":
                     self.current_menu = "main"
                 elif choice in ["1", "2", "3"]:
-                    post_link = input("[›] 𝐏𝐎𝐒𝐓 𝐔𝐑𝐋: ", "cyan")
-                    amount = int(input("[›] 𝐒𝐇𝐀𝐑𝐄 𝐂𝐎𝐔𝐍𝐓: ", "magenta") or 5)
-                    self.interval = float(input("[›] 𝐃𝐄𝐋𝐀𝐘 (𝐒𝐄𝐂𝐎𝐍𝐃𝐒): ", "yellow") or 3)
+                    post_link = input("\033[96m[›] 𝐏𝐎𝐒𝐓 𝐔𝐑𝐋: \033[0m")      # cyan
+                    amount = int(input("\033[95m[›] 𝐒𝐇𝐀𝐑𝐄 𝐂𝐎𝐔𝐍𝐓: \033[0m") or 5)  # magenta
+                    self.interval = float(input("\033[93m[›] 𝐃𝐄𝐋𝐀𝐘 (𝐒𝐄𝐂𝐎𝐍𝐃𝐒): \033[0m") or 3)  # yellow
                     
                     await self.run_share_process(int(choice), post_link, amount)
                     input("\n[Press Enter to continue]")
