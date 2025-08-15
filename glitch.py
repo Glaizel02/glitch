@@ -367,7 +367,7 @@ class FacebookAutoShare:
 [›] 𝐏𝐚𝐧𝐞𝐥: {current_mode}
 
         """
-        self.print_panel('', banner, "Hotpink")
+        self.print_panel('', banner, "hot_pink")
         self.print_panel('INFO', info, "purple")
     def show_main_menu(self):
         self.current_menu = "main"
