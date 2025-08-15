@@ -341,12 +341,12 @@ class FacebookAutoShare:
     def show_banner(self):
         banner = r"""
 
-      [magenta]  ██████╗ ██╗      ██╗ ████████╗  ██████╗ ██╗  ██╗
-      [medium_purple]██╔════╝  ██║      ██║ ╚══██╔══╝ ██╔════╝ ██║  ██║
-      [orchid]██║  ███╗ ██║      ██║    ██║    ██║      ███████║
-      [deep_pink4]██║   ██║ ██║      ██║    ██║    ██║      ██╔══██║
-      [bright_magenta]╚██████╔╝ ███████╗ ██║    ██║    ╚██████╗ ██║  ██║
-      [magenta] ╚═════╝  ╚══════╝ ╚═╝    ╚═╝     ╚═════╝ ╚═╝  ╚═╝
+                      [magenta]  ██████╗ ██╗      ██╗ ████████╗  ██████╗ ██╗  ██╗
+                      [medium_purple]██╔════╝  ██║      ██║ ╚══██╔══╝ ██╔════╝ ██║  ██║
+                      [orchid]██║  ███╗ ██║      ██║    ██║    ██║      ███████║
+                      [deep_pink4]██║   ██║ ██║      ██║    ██║    ██║      ██╔══██║
+                      [bright_magenta]╚██████╔╝ ███████╗ ██║    ██║    ╚██████╗ ██║  ██║
+                      [magenta] ╚═════╝  ╚══════╝ ╚═╝    ╚═╝     ╚═════╝ ╚═╝  ╚═╝
                                              
 
 
@@ -360,24 +360,25 @@ class FacebookAutoShare:
         current_mode = menu_modes.get(self.current_menu, 'Main Menu')
         
         info = f"""
-[›] Tool: FB Spam Share
-[›] Version: 1.1
-[›] Dev: GLITCHBYANNIE
-[›] Status: Active
-[›] Panel: {current_mode}
-        """
-        self.print_panel('', banner, "purple")
+[›] 𝐓𝐎𝐎𝐋: 𝐅𝐁 𝐒𝐩𝐚𝐦 𝐒𝐡𝐚𝐫𝐞
+[›] 𝐕𝐞𝐫𝐬𝐢𝐨𝐧: 𝟏.𝟏
+[›] 𝐃𝐞𝐯: 𝐆𝐋𝐈𝐓𝐂𝐇𝐁𝐘𝐀𝐍𝐍𝐈𝐄
+[›] 𝐒𝐭𝐚𝐭𝐮𝐬: 𝐀𝐜𝐭𝐢𝐯𝐞
+[›] 𝐏𝐚𝐧𝐞𝐥: {current_mode}
 
+        """
+        self.print_panel('', banner, "Hotpink")
+        self.print_panel('INFO', info, "purple")
     def show_main_menu(self):
         self.current_menu = "main"
         self.clear_screen()
         self.show_banner()
         self.print_panel(
             "Main Menu",
-            "[1] Initialize Spamshare\n"
-            "[2] Manage Resources\n"
-            "[3] Token Generator\n"
-            "[4] Exit",
+          "[𝟏] 𝐈𝐍𝐈𝐓𝐈𝐀𝐋𝐈𝐙𝐄 𝐒𝐏𝐀𝐌𝐒𝐇𝐀𝐑𝐄\n"
+          "[𝟐] 𝐌𝐀𝐍𝐀𝐆𝐄 𝐑𝐄𝐒𝐎𝐔𝐑𝐂𝐄𝐒\n"
+          "[𝟑] 𝐓𝐎𝐊𝐄𝐍 𝐆𝐄𝐍𝐄𝐑𝐀𝐓𝐎𝐑\n"
+          "[𝟒] 𝐄𝐗𝐈𝐓",
             "hot_pink"
         )
 
@@ -387,10 +388,11 @@ class FacebookAutoShare:
         self.show_banner()
         self.print_panel(
             "Spam Share",
-            "[1] Share as User\n"
-            "[2] Share as Page\n"
-            "[3] Combined Sharing\n"
-            "[0] Back to Main",
+           "[𝟏] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐔𝐒𝐄𝐑\n"
+           "[𝟐] 𝐒𝐇𝐀𝐑𝐄 𝐀𝐒 𝐏𝐀𝐆𝐄\n"
+           "[𝟑] 𝐂𝐎𝐌𝐁𝐈𝐍𝐄𝐃 𝐒𝐇𝐀𝐑𝐈𝐍𝐆\n"
+           "[𝟎] 𝐁𝐀𝐂𝐊 𝐓𝐎 𝐌𝐀𝐈𝐍"
+
             "hot_pink"
         )
 
@@ -490,10 +492,11 @@ class FacebookAutoShare:
         
         self.print_panel(
             "Token Generator",
-            "[1] Get Tokens+Cookies\n"
-            "[2] Get Cookies Only\n"
-            "[3] Get EAAG Token from Cookies\n"
-            "[0] Back to Main",
+           "[𝟏] 𝐆𝐄𝐓 𝐓𝐎𝐊𝐄𝐍𝐒+𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
+           "[𝟐] 𝐆𝐄𝐓 𝐂𝐎𝐎𝐊𝐈𝐄𝐒 𝐎𝐍𝐋𝐘\n"
+           "[𝟑] 𝐆𝐄𝐓 𝐄𝐀𝐀𝐆 𝐓𝐎𝐊𝐄𝐍 𝐅𝐑𝐎𝐌 𝐂𝐎𝐎𝐊𝐈𝐄𝐒\n"
+           "[𝟎] 𝐁𝐀𝐂𝐊 𝐓𝐎 𝐌𝐀𝐈𝐍",
+
             "hot_pink"
         )
         
@@ -572,8 +575,8 @@ class FacebookAutoShare:
         self.clear_screen()
         self.show_banner()
         
-        email = input("[›] Email/Username: ")
-        password = input("[›] Password: ")
+        email = input("[›] 𝐄𝐌𝐀𝐈𝐋/𝐔𝐒𝐄𝐑𝐍𝐀𝐌𝐄: ")
+        password = input("[›] 𝐏𝐀𝐒𝐒𝐖𝐎𝐑𝐃: ")
         
         self.loading(3, "Fetching Cookies")
         
